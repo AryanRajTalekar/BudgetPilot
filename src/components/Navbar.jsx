@@ -1,26 +1,42 @@
-import React from 'react'
+import React from "react";
 import { SiWebmoney } from "react-icons/si";
 import { IoArrowDownCircleOutline } from "react-icons/io5";
-
-
+import { Button } from "../components/ui/button";
+import { CoolMode } from "../components/magicui/cool-mode";
 
 const Navbar = () => {
   return (
-    <div className='w-full h-[7vw]  rounded-lg flex items-center justify-between'>
-      <div className='logo w-[20vw] h-[7vw] flex items-center text-white gap-4 p-8'>
-        <SiWebmoney size={50} />
-        <h1 className='text-3xl font-semibold'>BudgetPilot</h1>
-      </div>
-      <div>
+    <div className="w-full h-[7vw] max-h-20 px-4 md:px-8 flex items-center justify-between bg-transparent text-white">
 
+      {/* Logo Section */}
+      <CoolMode>
+        <div className="flex items-center gap-3 md:gap-4">
+
+          <SiWebmoney size={35} className="md:size-[50px]" />
+          <h1 className="text-lg md:text-2xl lg:text-3xl font-semibold">
+            BudgetPilot
+          </h1>
+
+        </div>
+      </CoolMode>
+
+      {/* Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <CoolMode>
+          <Button className="text-sm md:text-base font-semibold rounded-xl px-4 py-2 w-full sm:w-auto border border-transparent hover:underline transition duration-300">
+            Login / Create Account
+          </Button>
+        </CoolMode>
+
+        <CoolMode>
+          <Button className="flex items-center justify-center gap-2 text-sm md:text-base font-semibold border-2 rounded-xl px-4 py-2 hover:bg-white transition duration-300 hover:text-black">
+            Get BudgetPilot <IoArrowDownCircleOutline size={20} />
+          </Button>
+        </CoolMode>
       </div>
-      <div className='flex gap-4 p-14'>
-        <button className='text-white font-semibold  rounded-xl w-[10vw] h-[4vh]'>Login / Create Account</button>
-        <button className=' flex items-center p-4 gap-2 text-white font-semibold border border-2 rounded-xl w-[10vw] h-[4vh] hover:bg-white transition duration-300 hover:text-black'>Get BudgetPilot <IoArrowDownCircleOutline size={25}/>
-</button>
-      </div>
+
     </div>
-  )
-}
+  );
+};
 
-export default Navbar 
+export default Navbar;
