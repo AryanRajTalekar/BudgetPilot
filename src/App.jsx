@@ -1,17 +1,18 @@
 import Navbar from "./components/Navbar";
-import { SmoothCursor } from "./components/ui/smooth-cursor";
 import LandingPage from "./pages/LandingPage";
 import Quote from "./pages/Quote";
+import ExplanationPage from "./pages/ExplanationPage";
 
 export default function App() {
   return (
-    <div className="w-full h-screen">
-      <SmoothCursor />
-      <div className="relative w-full h-screen">
+    
+      <div className="w-full overflow-hidden overflow-hidden-x">
         <Navbar />
         <LandingPage />
-        <Quote/>
+        <Quote />
+        <ExplanationPage/>
       </div>
-    </div>
+
+    
   );
 }

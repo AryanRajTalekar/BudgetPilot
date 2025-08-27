@@ -7,7 +7,7 @@ import { CoolMode } from "../components/magicui/cool-mode";
 const Navbar = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-[7vw] max-h-20 px-4 md:px-8 flex items-center justify-between 
-                    bg-transparent text-white z-50">
+                    bg-transparent text-white z-100 ">
       {/* Logo Section */}
       <CoolMode>
         <div className="flex items-center gap-3 md:gap-4">
