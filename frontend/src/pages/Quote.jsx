@@ -2,14 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from "gsap";
 import { TextPlugin } from "gsap/TextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useUser, SignInButton } from "@clerk/clerk-react";
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
 const Quote = () => {
   const quoteRef = useRef(null);
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
-    // Shine animation (unchanged)
+    // Shine animation
     const shineTimeline = gsap.timeline({ repeat: -1, delay: 2 });
     shineTimeline.to(".shine-button-inner", {
       x: "150%",
@@ -17,54 +19,32 @@ const Quote = () => {
       duration: 2,
     });
 
-    // Typewriter with fixed duration; plays on enter, reverses when scrolling back above start
+    // Typewriter animation
     const tl = gsap.timeline({ paused: true });
     tl.to(quoteRef.current, {
       text: "Investment\nin knowledge pays\nthe best interest.",
-      duration: 2.2,     // adjust for slower/faster typing
+      duration: 2.2,
       ease: "none",
     });
 
-   const st = ScrollTrigger.create({
-  trigger: quoteRef.current,
-  start: "top 100%",           
-  end: "top 40%",             
-  onEnter: () => tl.play(),   
-  onEnterBack: () => tl.play(),
-  onLeaveBack: () => tl.reverse(), 
-});
-
+    const st = ScrollTrigger.create({
+      trigger: quoteRef.current,
+      start: "top 100%",
+      end: "top 40%",
+      onEnter: () => tl.play(),
+      onEnterBack: () => tl.play(),
+      onLeaveBack: () => tl.reverse(),
+    });
 
     return () => { st.kill(); tl.kill(); };
   }, []);
-
-
 
   return (
     <div className="quote-page relative w-full h-screen bg-[#fcfcfc] overflow-hidden flex flex-col items-center">
       {/* Reverse gradient at the top */}
       <div className="absolute top-0 left-0 w-full h-[14vw] bg-gradient-to-t from-transparent to-[#fcfcfc] z-10"></div>
 
-      {/* Buttons at the top, centered */}
-      <div className="cta-container flex flex-col items-center justify-center space-y-4 w-full h-[25vh]">
-        <h2 className="font-semibold text-2xl md:text-5xl" style={{ color: '#000000' }}>
-          JOIN THE PLATFORM
-        </h2>
-        <button
-          className="relative overflow-hidden py-3 px-8 rounded-full shadow-lg text-white font-bold"
-          style={{ backgroundImage: "linear-gradient(to right, #F56992, #990001)" }}
-        >
-          <div
-            className="shine-button-inner absolute top-0 left-0 w-1/2 h-full -skew-x-[20deg]"
-            style={{
-              background: "linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%)",
-              transform: "translateX(-100%)"
-            }}
-          ></div>
-          Get BudgetPilot
-        </button>
-
-      </div>
+      
 
       {/* Quote text below */}
       <div className="w-full p-12 mt-20 flex justify-center">
