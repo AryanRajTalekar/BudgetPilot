@@ -12,6 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "BudgetPilot",
   description: "One stop Finance Platform",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
