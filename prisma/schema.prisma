@@ -3,9 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model User {
@@ -17,8 +15,10 @@ model User {
   transactions  Transaction[]
   accounts      Account[]
   budgets       Budget[]
+  lifeGoals LifeGoal[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
 
   @@map("users")
 }
@@ -32,6 +32,7 @@ model Account {
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  lifeGoals LifeGoal[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -64,6 +65,27 @@ model Transaction {
   @@map("transactions")
 }
 
+model LifeGoal {
+  id             String   @id @default(uuid())
+  title          String
+  description    String?
+  targetAmount   Decimal
+  savedAmount    Decimal  @default(0)
+  targetDate     DateTime
+  status         GoalStatus @default(ACTIVE)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId      String
+  account        Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([accountId])
+  @@map("life_goals")
+}
+
+
 
 model Budget {
   id          String       @id @default(uuid())
@@ -92,6 +114,12 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
 enum RecurringInterval {

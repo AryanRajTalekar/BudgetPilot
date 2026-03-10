@@ -154,3 +154,27 @@ export async function getDashboardData() {
 
   return transactions.map(serializeTransaction);
 }
+
+export async function getUserLifeGoals() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+  if (!user) throw new Error("User not found");
+
+  const goals = await db.lifeGoal.findMany({
+    where: { userId: user.id },
+    include: {
+      account: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return goals.map((goal) => ({
+    ...serializeGoal(goal),
+    accountBalance: goal.account.balance.toNumber(),
+  }));
+}
+

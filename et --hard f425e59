@@ -1,0 +1,8 @@
+[33m7d70403[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: reset: moving to 7d70403
+[33m7d70403[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{1}: checkout: moving from backup-before-fix to main
+[33mc05fbba[m[33m ([m[1;32mbackup-before-fix[m[33m)[m HEAD@{2}: checkout: moving from main to backup-before-fix
+[33m7d70403[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{3}: rebase (finish): returning to refs/heads/main
+[33m7d70403[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{4}: rebase (continue): Make Toggle Ready and mobile responsive
+[33mc05fbba[m[33m ([m[1;32mbackup-before-fix[m[33m)[m HEAD@{5}: pull origin main --rebase (start): checkout c05fbba655fbf25ed477960a80516b68099901ef
+[33mf425e59[m HEAD@{6}: Branch: renamed refs/heads/master to refs/heads/main
+[33mf425e59[m HEAD@{8}: commit (initial): Make Toggle Ready and mobile responsive

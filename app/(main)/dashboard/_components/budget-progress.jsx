@@ -20,7 +20,7 @@ import { updateBudget } from "@/actions/budget";
 export function BudgetProgress({ initialBudget, currentExpenses }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newBudget, setNewBudget] = useState(
-    initialBudget?.amount?.toString() || ""
+    initialBudget?.amount?.toString() || "",
   );
 
   const {
@@ -64,24 +64,34 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
   }, [error]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card
+      className="bg-white dark:bg-zinc-900/70 
+               border border-black/5 dark:border-white/5 
+               backdrop-blur-xl 
+               transition-all duration-300"
+    >
+      <CardHeader
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between 
+                 space-y-2 sm:space-y-0 pb-4 px-4 sm:px-6"
+      >
         <div className="flex-1">
-          <CardTitle className="text-sm font-medium">
+          <CardTitle className="text-sm sm:text-base font-medium">
             Monthly Budget (Default Account)
           </CardTitle>
-          <div className="flex items-center gap-2 mt-1">
+
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             {isEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <Input
                   type="number"
                   value={newBudget}
                   onChange={(e) => setNewBudget(e.target.value)}
-                  className="w-32"
+                  className="w-full sm:w-32"
                   placeholder="Enter amount"
                   autoFocus
                   disabled={isLoading}
                 />
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -90,6 +100,7 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
                 >
                   <Check className="h-4 w-4 text-green-500" />
                 </Button>
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -101,13 +112,14 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
               </div>
             ) : (
               <>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   {initialBudget
                     ? `$${currentExpenses.toFixed(
-                        2
+                        2,
                       )} of $${initialBudget.amount.toFixed(2)} spent`
                     : "No budget set"}
                 </CardDescription>
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -121,13 +133,13 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="px-4 sm:px-6 pb-6">
         {initialBudget && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Progress
               value={percentUsed}
               extraStyles={`${
-                // add to Progress component
                 percentUsed >= 90
                   ? "bg-red-500"
                   : percentUsed >= 75
@@ -135,7 +147,8 @@ export function BudgetProgress({ initialBudget, currentExpenses }) {
                     : "bg-green-500"
               }`}
             />
-            <p className="text-xs text-muted-foreground text-right">
+
+            <p className="text-xs sm:text-sm text-muted-foreground text-right">
               {percentUsed.toFixed(1)}% used
             </p>
           </div>

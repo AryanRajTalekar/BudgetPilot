@@ -33,7 +33,7 @@ export function ReceiptScanner({ onScanComplete }) {
   }, [scanReceiptLoading, scannedData]);
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full">
       <input
         type="file"
         ref={fileInputRef}
@@ -45,22 +45,30 @@ export function ReceiptScanner({ onScanComplete }) {
           if (file) handleReceiptScan(file);
         }}
       />
+
       <Button
         type="button"
         variant="outline"
-        className="w-full h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 animate-gradient hover:opacity-90 transition-opacity text-white hover:text-white"
+        className="w-full h-11 sm:h-10 
+                 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 
+                 animate-gradient 
+                 hover:opacity-90 transition-all duration-300 
+                 text-white hover:text-white 
+                 border-none 
+                 text-sm sm:text-base 
+                 font-medium"
         onClick={() => fileInputRef.current?.click()}
         disabled={scanReceiptLoading}
       >
         {scanReceiptLoading ? (
           <>
-            <Loader2 className="mr-2 animate-spin" />
-            <span>Scanning Receipt...</span>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span className="truncate">Scanning Receipt...</span>
           </>
         ) : (
           <>
-            <Camera className="mr-2" />
-            <span>Scan Receipt with AI</span>
+            <Camera className="mr-2 h-4 w-4" />
+            <span className="truncate">Scan Receipt with AI</span>
           </>
         )}
       </Button>

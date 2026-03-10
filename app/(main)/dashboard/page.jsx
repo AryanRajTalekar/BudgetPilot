@@ -5,14 +5,17 @@ import { getCurrentBudget } from "@/actions/budget";
 import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { BudgetProgress } from "./_components/budget-progress";
+import { LifeGoals } from "./_components/life-goals";
+import { getGoals } from "@/actions/goals";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { DashboardOverview } from "./_components/transaction-overview";
 
 export default async function DashboardPage() {
-  const [accounts, transactions] = await Promise.all([
+  const [accounts, transactions, goals] = await Promise.all([
     getUserAccounts(),
     getDashboardData(),
+    getGoals(),
   ]);
 
   const defaultAccount = accounts?.find((account) => account.isDefault);
@@ -30,6 +33,20 @@ export default async function DashboardPage() {
         initialBudget={budgetData?.budget}
         currentExpenses={budgetData?.currentExpenses || 0}
       />
+
+      {/* Life Goals */}
+      {/* Life Goals */}
+      {goals?.length > 0
+        ? goals.map((goal) => (
+            <LifeGoals
+              key={goal.id}
+              goal={goal}
+              accountId={defaultAccount?.id}
+            />
+          ))
+        : defaultAccount && (
+            <LifeGoals goal={null} accountId={defaultAccount.id} />
+          )}
 
       {/* Dashboard Overview */}
       <DashboardOverview

@@ -50,31 +50,49 @@ export function AccountCard({ account }) {
   }, [error]);
 
   return (
-    <Card className="hover:shadow-md transition-shadow group relative">
-      <Link href={`/account/${id}`}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium capitalize">
+    <Card
+      className="hover:shadow-md transition-all duration-300 group relative 
+                   bg-white dark:bg-zinc-900/70 
+                   border border-black/5 dark:border-white/5 
+                   backdrop-blur-xl"
+    >
+      <Link href={`/account/${id}`} className="block h-full">
+        <CardHeader
+          className="flex flex-row items-center justify-between 
+                             space-y-0 pb-2 px-4 sm:px-6"
+        >
+          <CardTitle className="text-sm sm:text-base font-medium capitalize">
             {name}
           </CardTitle>
+
           <Switch
             checked={isDefault}
             onClick={handleDefaultChange}
             disabled={updateDefaultLoading}
           />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
+
+        <CardContent className="px-4 sm:px-6 pb-4">
+          <div className="text-xl sm:text-2xl font-bold">
             ${parseFloat(balance).toFixed(2)}
           </div>
-          <p className="text-xs text-muted-foreground">
+
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {type.charAt(0) + type.slice(1).toLowerCase()} Account
           </p>
         </CardContent>
-        <CardFooter className="flex justify-between text-sm text-muted-foreground">
+
+        <CardFooter
+          className="flex justify-between 
+                             text-xs sm:text-sm 
+                             text-muted-foreground 
+                             px-4 sm:px-6 pb-4"
+        >
           <div className="flex items-center">
             <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
             Income
           </div>
+
           <div className="flex items-center">
             <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
             Expense

@@ -129,18 +129,22 @@ export function AddTransactionForm({
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Receipt Scanner - Only show in create mode */}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 sm:space-y-7"
+    >
       {!editMode && <ReceiptScanner onScanComplete={handleScanComplete} />}
 
       {/* Type */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Type</label>
+        <label className="text-sm font-medium text-black dark:text-white">
+          Type
+        </label>
         <Select
           onValueChange={(value) => setValue("type", value)}
           defaultValue={type}
         >
-          <SelectTrigger>
+          <SelectTrigger className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus:ring-1 focus:ring-purple-500">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -153,14 +157,17 @@ export function AddTransactionForm({
         )}
       </div>
 
-      {/* Amount and Account */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Amount & Account */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Amount</label>
+          <label className="text-sm font-medium text-black dark:text-white">
+            Amount
+          </label>
           <Input
             type="number"
             step="0.01"
             placeholder="0.00"
+            className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus-visible:ring-1 focus-visible:ring-purple-500"
             {...register("amount")}
           />
           {errors.amount && (
@@ -169,12 +176,14 @@ export function AddTransactionForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Account</label>
+          <label className="text-sm font-medium text-black dark:text-white">
+            Account
+          </label>
           <Select
             onValueChange={(value) => setValue("accountId", value)}
             defaultValue={getValues("accountId")}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus:ring-1 focus:ring-purple-500">
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
@@ -186,7 +195,7 @@ export function AddTransactionForm({
               <CreateAccountDrawer>
                 <Button
                   variant="ghost"
-                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                  className="w-full text-left hover:bg-accent/50 dark:hover:bg-zinc-800/50"
                 >
                   Create Account
                 </Button>
@@ -201,12 +210,14 @@ export function AddTransactionForm({
 
       {/* Category */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Category</label>
+        <label className="text-sm font-medium text-black dark:text-white">
+          Category
+        </label>
         <Select
           onValueChange={(value) => setValue("category", value)}
           defaultValue={getValues("category")}
         >
-          <SelectTrigger>
+          <SelectTrigger className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus:ring-1 focus:ring-purple-500">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
@@ -224,13 +235,15 @@ export function AddTransactionForm({
 
       {/* Date */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Date</label>
+        <label className="text-sm font-medium text-black dark:text-white">
+          Date
+        </label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                "w-full pl-3 text-left font-normal",
+                "w-full pl-3 text-left font-normal bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 hover:bg-accent/50 dark:hover:bg-zinc-800/50",
                 !date && "text-muted-foreground"
               )}
             >
@@ -250,26 +263,28 @@ export function AddTransactionForm({
             />
           </PopoverContent>
         </Popover>
-        {errors.date && (
-          <p className="text-sm text-red-500">{errors.date.message}</p>
-        )}
       </div>
 
       {/* Description */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Description</label>
-        <Input placeholder="Enter description" {...register("description")} />
-        {errors.description && (
-          <p className="text-sm text-red-500">{errors.description.message}</p>
-        )}
+        <label className="text-sm font-medium text-black dark:text-white">
+          Description
+        </label>
+        <Input
+          placeholder="Enter description"
+          className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus-visible:ring-1 focus-visible:ring-purple-500"
+          {...register("description")}
+        />
       </div>
 
-      {/* Recurring Toggle */}
-      <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-        <div className="space-y-0.5">
-          <label className="text-base font-medium">Recurring Transaction</label>
+      {/* Recurring */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-black/5 dark:border-white/5 bg-white dark:bg-zinc-900/60 backdrop-blur-xl p-4">
+        <div>
+          <label className="text-base font-medium text-black dark:text-white">
+            Recurring Transaction
+          </label>
           <div className="text-sm text-muted-foreground">
-            Set up a recurring schedule for this transaction
+            Set up a recurring schedule
           </div>
         </div>
         <Switch
@@ -278,43 +293,22 @@ export function AddTransactionForm({
         />
       </div>
 
-      {/* Recurring Interval */}
-      {isRecurring && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Recurring Interval</label>
-          <Select
-            onValueChange={(value) => setValue("recurringInterval", value)}
-            defaultValue={getValues("recurringInterval")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select interval" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DAILY">Daily</SelectItem>
-              <SelectItem value="WEEKLY">Weekly</SelectItem>
-              <SelectItem value="MONTHLY">Monthly</SelectItem>
-              <SelectItem value="YEARLY">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.recurringInterval && (
-            <p className="text-sm text-red-500">
-              {errors.recurringInterval.message}
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Actions */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Button
           type="button"
           variant="outline"
-          className="w-full"
+          className="w-full border-black/10 dark:border-white/10"
           onClick={() => router.back()}
         >
           Cancel
         </Button>
-        <Button type="submit" className="w-full" disabled={transactionLoading}>
+
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 text-white hover:opacity-90 transition-all duration-300"
+          disabled={transactionLoading}
+        >
           {transactionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
