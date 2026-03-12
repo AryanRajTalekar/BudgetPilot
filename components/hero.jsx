@@ -44,16 +44,16 @@ const HeroSection = () => {
               flex items-center gap-4 group [&_svg]:!w-8 [&_svg]:!h-8 md:[&_svg]:!w-10 md:[&_svg]:!h-10"
             >
               Get Started
-              <MoveUpRight className="flex items-center justify-center w-8 h-8 border px-2 rounded-full" />
+              <MoveUpRight className="flex items-center justify-center w-8 h-8 border border-gray-300 dark:border-gray-600 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
             </Button>
           </Link>
         </div>
       </div>
 
       {/* Marquee */}
-      <div className="w-full mt-16 md:mt-20 p-4 md:p-8 h-[8vh] md:h-[10vh]">
+      {/* <div className="w-full mt-16 md:mt-20 p-4 md:p-8 h-[8vh] md:h-[10vh]">
         <MarqueeText />
-      </div>
+      </div> */}
     </section>
   );
 };

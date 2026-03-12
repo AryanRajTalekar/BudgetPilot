@@ -38,7 +38,7 @@ export function ReceiptScanner({ onScanComplete }) {
         type="file"
         ref={fileInputRef}
         className="hidden"
-        accept="image/*"
+        accept="image/*,application/pdf"
         capture="environment"
         onChange={(e) => {
           const file = e.target.files?.[0];
