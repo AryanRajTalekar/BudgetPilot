@@ -86,7 +86,7 @@ export default function ImportStatementPage() {
           )}
 
           {status === "queued" && (
-            <div className="flex items-center gap-2 text-red-500 text-sm font-bold">
+            <div className="flex items-center gap-2 text-blue-500 text-sm font-bold">
               <Loader2 className="animate-spin w-4 h-4" />
               Statement uploaded successfully. Transactions will appear in your
               dashboard shortly.You can safely leave this page.
