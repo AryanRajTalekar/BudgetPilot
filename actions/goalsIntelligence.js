@@ -70,7 +70,7 @@ export async function getGoalAINudge(goalId) {
   const g = serializeGoal(goal);
   const intel = computeGoalIntelligence(g);
 
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `
 You are a personal finance coach. Analyze this savings goal and give personalized advice.
