@@ -1,22 +1,30 @@
 export const dynamic = "force-dynamic";
-import { Suspense } from "react";
 import { getUserAccounts } from "@/actions/dashboard";
 import { getDashboardData } from "@/actions/dashboard";
 import { getCurrentBudget } from "@/actions/budget";
 import { AccountCard } from "./_components/account-card";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { BudgetProgress } from "./_components/budget-progress";
-import { LifeGoals } from "./_components/life-goals";
-import { getGoals } from "@/actions/goals";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { DashboardOverview } from "./_components/transaction-overview";
+import SpendingHeatmap from "@/components/heatmap/SpendingHeatmap";
+import { InvestmentAdvisorWidget } from "@/components/investment/InvestmentAdvisorWidget";
+import { getGoalsWithIntelligence } from "@/actions/goalsIntelligence";
+import { GoalIntelligenceCard } from "@/components/goals/GoalIntelligenceCard";
+import { CreateGoalDrawer } from "@/components/goals/CreateGoalDrawer";
+import { FinancialHealthScore } from "./_components/FinancialHealthScore";
+import { ExportData } from "./_components/ExportData";
+import { TaxSummary } from "./_components/TaxSummary";
+import { EmiPageClient } from "@/app/emi/_components/EmiPageClient";
+import { getUserEmiLoans } from "@/actions/emiTracker";
 
 export default async function DashboardPage() {
-  const [accounts, transactions, goals] = await Promise.all([
+  const [accounts, transactions, goals, loans] = await Promise.all([
     getUserAccounts(),
     getDashboardData(),
-    getGoals(),
+    getGoalsWithIntelligence(),
+    getUserEmiLoans(),
   ]);
 
   const defaultAccount = accounts?.find((account) => account.isDefault);
@@ -35,19 +43,49 @@ export default async function DashboardPage() {
         currentExpenses={budgetData?.currentExpenses || 0}
       />
 
-      {/* Life Goals */}
-      {/* Life Goals */}
-      {goals?.length > 0
-        ? goals.map((goal) => (
-            <LifeGoals
-              key={goal.id}
-              goal={goal}
-              accountId={defaultAccount?.id}
-            />
+      {/* Financial Intelligence Row */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <FinancialHealthScore />
+        <ExportData />
+        <TaxSummary />
+      </div>
+
+      {/* EMI Tracker */}
+      <div className="space-y-4 border rounded-xl p-5 space-y-5 shadow-sm">
+        <h2 className="text-lg font-semibold">EMI & Loans</h2>
+        <EmiPageClient initialLoans={loans} />
+      </div>
+
+      {/* Spending Heatmap */}
+      <div>
+        {/* <h2 className="text-lg font-semibold mb-2">Spending Activity</h2> */}
+        <SpendingHeatmap months={12} />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Financial Goals</h2>
+          <CreateGoalDrawer />
+        </div>
+
+        {goals?.length > 0 ? (
+          goals.map((goal) => (
+            <GoalIntelligenceCard key={goal.id} goal={goal} />
           ))
-        : defaultAccount && (
-            <LifeGoals goal={null} accountId={defaultAccount.id} />
-          )}
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center text-muted-foreground">
+              No goals yet.{" "}
+              <span className="text-foreground font-medium">
+                Create your first goal
+              </span>{" "}
+              to start tracking progress.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <InvestmentAdvisorWidget />
 
       {/* Dashboard Overview */}
       <DashboardOverview

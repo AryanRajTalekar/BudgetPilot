@@ -74,7 +74,7 @@ export function AccountCard({ account }) {
 
         <CardContent className="px-4 sm:px-6 pb-4">
           <div className="text-xl sm:text-2xl font-bold">
-            ${parseFloat(balance).toFixed(2)}
+             ₹{parseFloat(balance).toFixed(2)}
           </div>
 
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">

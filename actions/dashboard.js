@@ -17,6 +17,14 @@ const serializeTransaction = (obj) => {
   return serialized;
 };
 
+
+
+const serializeGoal = (goal) => ({
+  ...goal,
+  targetAmount: goal.targetAmount.toNumber(),
+  savedAmount: goal.savedAmount.toNumber(),
+});
+
 export async function getUserAccounts() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");

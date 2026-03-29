@@ -9,6 +9,11 @@ import {
   processBankStatement,
 } from "@/lib/inngest/function";
 
+// NEW
+import { investmentAdvisorMonthly, investmentAdvisorOnDemand } from "@/lib/inngest/investmentAdvisor";
+import { weeklyFinanceDigest, enhancedBudgetAlerts } from "@/lib/inngest/weeklyDigestAndAlerts";
+import { sendWeeklyNewsletter } from "@/lib/inngest/newsletter";
+
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
@@ -17,5 +22,11 @@ export const { GET, POST, PUT } = serve({
     generateMonthlyReports,
     checkBudgetAlerts,
     processBankStatement,
+    // new
+    investmentAdvisorMonthly,
+    investmentAdvisorOnDemand,
+    weeklyFinanceDigest,
+    enhancedBudgetAlerts,
+    sendWeeklyNewsletter,
   ],
 });

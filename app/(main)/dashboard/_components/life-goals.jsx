@@ -20,7 +20,7 @@ import { updateGoal } from "@/actions/goals";
 import { addFundsToGoal } from "@/actions/goals";
 import { createGoal } from "@/actions/goals";
 
-export function LifeGoals({ goal ,accountId }) {
+export function LifeGoals({ goal, accountId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTarget, setNewTarget] = useState(
     goal?.targetAmount?.toString() || "",
@@ -51,36 +51,35 @@ export function LifeGoals({ goal ,accountId }) {
       : 0;
 
   const handleUpdateGoal = async () => {
-  const amount = parseFloat(newTarget);
+    const amount = parseFloat(newTarget);
 
-  if (isNaN(amount) || amount <= 0) {
-    toast.error("Please enter a valid amount");
-    return;
-  }
-
-  if (!goal) {
-    // create new goal
-    const result = await createGoal({
-      title: newTitle || "My Goal",
-      targetAmount: amount,
-      targetDate: new Date(),
-      accountId: accountId
-    });
-
-    if (result.success) {
-      toast.success("Goal created successfully");
-    } else {
-      toast.error(result.error);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
     }
 
-  } else {
-    // update existing goal
-    await updateGoalFn(goal.id, {
-      title: newTitle,
-      targetAmount: amount,
-    });
-  }
-};
+    if (!goal) {
+      // create new goal
+      const result = await createGoal({
+        title: newTitle || "My Goal",
+        targetAmount: amount,
+        targetDate: new Date(),
+        accountId: accountId,
+      });
+
+      if (result.success) {
+        toast.success("Goal created successfully");
+      } else {
+        toast.error(result.error);
+      }
+    } else {
+      // update existing goal
+      await updateGoalFn(goal.id, {
+        title: newTitle,
+        targetAmount: amount,
+      });
+    }
+  };
 
   const handleCancel = () => {
     setNewTarget(goal?.targetAmount?.toString() || "");
@@ -95,7 +94,7 @@ export function LifeGoals({ goal ,accountId }) {
       return;
     }
 
-    await addFundsToGoal(goal.id, amount);
+    await addFundsFn(goal.id, amount);
 
     setAddAmount("");
     setIsAdding(false);
@@ -185,7 +184,7 @@ export function LifeGoals({ goal ,accountId }) {
               <>
                 <CardDescription className="text-xs sm:text-sm">
                   {goal
-                    ? `$${Number(goal.savedAmount).toFixed(2)} of $${Number(goal.targetAmount).toFixed(2)} saved`
+                    ? ` ₹${Number(goal.savedAmount).toFixed(2)} of  ₹${Number(goal.targetAmount).toFixed(2)} saved`
                     : "No goal set"}
                 </CardDescription>
 
@@ -222,41 +221,41 @@ export function LifeGoals({ goal ,accountId }) {
             </p>
           </div>
         )}
-{goal && (
-        <div className="flex items-center gap-2 mt-3">
-          {isAdding ? (
-            <>
-              <Input
-                type="number"
-                placeholder="Amount"
-                value={addAmount}
-                onChange={(e) => setAddAmount(e.target.value)}
-                className="w-28"
-              />
+        {goal && (
+          <div className="flex items-center gap-2 mt-3">
+            {isAdding ? (
+              <>
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  value={addAmount}
+                  onChange={(e) => setAddAmount(e.target.value)}
+                  className="w-28"
+                />
 
-              <Button
-                size="sm"
-                onClick={handleAddMoney}
-                disabled={isAddingFunds}
-              >
-                Add
-              </Button>
+                <Button
+                  size="sm"
+                  onClick={handleAddMoney}
+                  disabled={isAddingFunds}
+                >
+                  Add
+                </Button>
 
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsAdding(false)}
-              >
-                Cancel
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsAdding(false)}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" onClick={() => setIsAdding(true)}>
+                Add Money
               </Button>
-            </>
-          ) : (
-            <Button size="sm" onClick={() => setIsAdding(true)}>
-              Add Money
-            </Button>
-          )}
-        </div>
-)}
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

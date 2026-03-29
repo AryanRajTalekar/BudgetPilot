@@ -28,12 +28,12 @@ export async function getCurrentBudget(accountId) {
     const startOfMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      1
+      1,
     );
     const endOfMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth() + 1,
-      0
+      0,
     );
 
     const expenses = await db.transaction.aggregate({
@@ -52,7 +52,13 @@ export async function getCurrentBudget(accountId) {
     });
 
     return {
-      budget: budget ? { ...budget, amount: budget.amount.toNumber() } : null,
+      budget: budget
+        ? {
+            ...budget,
+            amount: Number(budget.amount),
+            spent: Number(budget.spent),
+          }
+        : null,
       currentExpenses: expenses._sum.amount
         ? expenses._sum.amount.toNumber()
         : 0,
@@ -91,7 +97,11 @@ export async function updateBudget(amount) {
     revalidatePath("/dashboard");
     return {
       success: true,
-      data: { ...budget, amount: budget.amount.toNumber() },
+      data: {
+        ...budget,
+        amount: budget.amount.toNumber(),
+        spent: Number(budget.spent),
+      },
     };
   } catch (error) {
     console.error("Error updating budget:", error);

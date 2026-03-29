@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
-
+import { createNotification } from "@/lib/notifications";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -83,13 +83,71 @@ export async function createTransaction(data) {
         },
       });
 
+      // ✅ Update account balance
       await tx.account.update({
         where: { id: data.accountId },
         data: { balance: newBalance },
       });
 
+      // Calculate month string from transaction date
+      const monthString = new Date(data.date).toISOString().slice(0, 7); // "YYYY-MM"
+
+      // SAFE budget update
+      if (data.type === "EXPENSE") {
+        await tx.budget.upsert({
+          where: {
+            userId_month: { userId: user.id, month: monthString },
+          },
+          update: {
+            spent: { increment: data.amount }, // increment spent for this month
+          },
+          create: {
+            userId: user.id,
+            month: monthString,
+            amount: 0, // default budget, can be updated later
+            spent: data.amount,
+          },
+        });
+      }
+
       return newTransaction;
     });
+
+    // 🔔 NOTIFICATIONS
+
+    // 1. Large expense alert
+    if (data.type === "EXPENSE" && data.amount >= 5000) {
+      await createNotification({
+        userId: user.id,
+        title: "💸 Large Expense",
+        message: `You spent ₹${data.amount}. Keep track of big expenses.`,
+        type: "ALERT",
+      });
+    }
+
+    // 2. First transaction dopamine hit 😄
+    const count = await db.transaction.count({
+      where: { userId: user.id },
+    });
+
+    if (count === 1) {
+      await createNotification({
+        userId: user.id,
+        title: "🎉 First Transaction!",
+        message: "Great start! You're now tracking your finances.",
+        type: "SYSTEM",
+      });
+    }
+
+    // 3. Income notification
+    if (data.type === "INCOME") {
+      await createNotification({
+        userId: user.id,
+        title: "💰 Income Added",
+        message: `₹${data.amount} added to your account`,
+        type: "INCOME",
+      });
+    }
 
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
@@ -173,19 +231,81 @@ export async function updateTransaction(id, data) {
         },
       });
 
-      // Update account balance
-      await tx.account.update({
-        where: { id: data.accountId },
-        data: {
-          balance: {
-            increment: netBalanceChange,
+      // ✅ Update account balance
+      // 🧠 Handle account change properly
+      if (originalTransaction.accountId !== data.accountId) {
+        // 1. Revert old account
+        const revertAmount =
+          originalTransaction.type === "EXPENSE"
+            ? originalTransaction.amount.toNumber()
+            : -originalTransaction.amount.toNumber();
+
+        await tx.account.update({
+          where: { id: originalTransaction.accountId },
+          data: {
+            balance: {
+              increment: revertAmount,
+            },
           },
-        },
+        });
+
+        // 2. Apply to new account
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: {
+            balance: {
+              increment: newBalanceChange,
+            },
+          },
+        });
+      } else {
+        // Normal case (same account)
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: {
+            balance: {
+              increment: netBalanceChange,
+            },
+          },
+        });
+      }
+
+      // 🔥 NEW: Budget handling
+      const oldExpense =
+        originalTransaction.type === "EXPENSE"
+          ? originalTransaction.amount.toNumber()
+          : 0;
+
+      const newExpense = data.type === "EXPENSE" ? data.amount : 0;
+
+      const budgetChange = newExpense - oldExpense;
+
+      if (budgetChange !== 0) {
+        const budget = await tx.budget.findUnique({
+          where: { userId: user.id },
+        });
+
+        if (budget) {
+          await tx.budget.update({
+            where: { userId: user.id },
+            data: {
+              amount: {
+                decrement: budgetChange,
+              },
+            },
+          });
+        }
+      }
+
+      await createNotification({
+        userId: user.id,
+        title: "✏️ Transaction Updated",
+        message: `Your transaction "${data.description}" was updated`,
+        type: "UPDATE",
       });
 
       return updated;
     });
-
     revalidatePath("/dashboard");
     revalidatePath(`/account/${data.accountId}`);
 
@@ -278,6 +398,15 @@ Rules:
 
     const data = JSON.parse(cleanedText);
 
+    if (!data.amount) return {};
+
+    await createNotification({
+      userId,
+      title: "🧾 Receipt Scanned",
+      message: `₹${data.amount} from ${data.merchantName} detected`,
+      type: "AI",
+    });
+
     return {
       amount: Number(data.amount),
       date: new Date(data.date),
@@ -290,7 +419,6 @@ Rules:
     throw new Error("Failed to scan receipt");
   }
 }
-
 
 // Helper function to calculate next recurring date
 function calculateNextRecurringDate(startDate, interval) {

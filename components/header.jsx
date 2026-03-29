@@ -6,6 +6,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { checkUser } from "@/lib/checkUser";
 import { Slack } from "lucide-react";
 import ThemeToggle from "./theme-toggle";
+import NotificationBell from "@/components/NotificationBell";
 
 const Header = async () => {
   await checkUser();
@@ -80,6 +81,7 @@ const Header = async () => {
           </SignedOut>
 
           <SignedIn>
+              <NotificationBell />
             <UserButton
               appearance={{
                 elements: {

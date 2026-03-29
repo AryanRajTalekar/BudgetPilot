@@ -171,38 +171,70 @@ export async function addFundsToGoal(goalId, amount) {
 
     if (!goal) throw new Error("Goal not found");
 
-    // update goal saved amount
-    const updatedGoal = await db.lifeGoal.update({
-      where: { id: goalId },
-      data: {
-        savedAmount: {
-          increment: amount,
-        },
+    const updatedGoal = await db.$transaction(async (tx) => {
+  // 1️⃣ Update goal
+  const goalUpdate = await tx.lifeGoal.update({
+    where: { id: goalId },
+    data: {
+      savedAmount: {
+        increment: amount,
       },
-    });
+    },
+  });
 
-    // reduce account balance
-    await db.account.update({
-      where: { id: goal.accountId },
-      data: {
-        balance: {
-          decrement: amount,
-        },
+  // 2️⃣ Reduce account balance
+  await tx.account.update({
+    where: { id: goal.accountId },
+    data: {
+      balance: {
+        decrement: amount,
       },
-    });
+    },
+  });
 
-    // create transaction
-    await db.transaction.create({
-      data: {
-        type: "EXPENSE",
-        amount,
-        description: `Contribution to goal: ${goal.title}`,
-        accountId: goal.accountId,
+  // 3️⃣ Create transaction (IMPORTANT: use lowercase category)
+  await tx.transaction.create({
+    data: {
+      type: "EXPENSE",
+      amount,
+      description: `Contribution to goal: ${goal.title}`,
+      accountId: goal.accountId,
+      userId: user.id,
+      category: "savings", // ✅ FIXED
+      date: new Date(),
+    },
+  });
+
+  // 4️⃣ 🔥 UPDATE BUDGET (THIS IS THE FIX YOU NEED)
+  const now = new Date();
+  const monthString = `${now.getFullYear()}-${String(
+    now.getMonth() + 1,
+  ).padStart(2, "0")}`;
+
+  await tx.budget.upsert({
+    where: {
+      userId_month: {
         userId: user.id,
-        category: "Savings",
-        date: new Date(),
+        month: monthString,
       },
-    });
+    },
+    update: {
+      spent: {
+        increment: amount,
+      },
+    },
+    create: {
+      userId: user.id,
+      month: monthString,
+      amount: 0,
+      spent: amount,
+    },
+  });
+
+  return goalUpdate;
+});
+
+
     revalidatePath("/dashboard");
 
     return {

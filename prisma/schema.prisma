@@ -7,18 +7,19 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  clerkUserId   String    @unique // clerk user id
-  email         String    @unique
+  id            String         @id @default(uuid())
+  clerkUserId   String         @unique
+  email         String         @unique
   name          String?
   imageUrl      String?
-  transactions  Transaction[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   accounts      Account[]
-  budgets       Budget[]
-  lifeGoals LifeGoal[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
+  budgets       Budget?
+  emi_loans     EmiLoan[]
+  lifeGoals     LifeGoal[]
+  notifications Notification[]
+  transactions  Transaction[]
 
   @@map("users")
 }
@@ -27,38 +28,38 @@ model Account {
   id           String        @id @default(uuid())
   name         String
   type         AccountType
-  balance      Decimal       @default(0) // will ask inital balance while creating an account
+  balance      Decimal       @default(0)
   isDefault    Boolean       @default(false)
   userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  lifeGoals LifeGoal[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lifeGoals    LifeGoal[]
+  transactions Transaction[]
 
   @@index([userId])
   @@map("accounts")
 }
 
 model Transaction {
-  id                String            @id @default(uuid())
-  type             TransactionType
-  amount           Decimal
-  description      String?
-  date             DateTime
-  category         String           
-  receiptUrl       String?
-  isRecurring      Boolean           @default(false)
-  recurringInterval RecurringInterval? // Only used if isRecurring is true
-  nextRecurringDate DateTime?         // Next date for recurring transaction
-  lastProcessed    DateTime?         // Last time this recurring transaction was processed
-  status           TransactionStatus  @default(COMPLETED)
-  userId           String
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountId        String
-  account          Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                String             @id @default(uuid())
+  type              TransactionType
+  amount            Decimal
+  description       String?
+  date              DateTime
+  category          String
+  receiptUrl        String?
+  isRecurring       Boolean            @default(false)
+  recurringInterval RecurringInterval?
+  nextRecurringDate DateTime?
+  lastProcessed     DateTime?
+  status            TransactionStatus  @default(COMPLETED)
+  userId            String
+  accountId         String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  account           Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([accountId])
@@ -66,38 +67,82 @@ model Transaction {
 }
 
 model LifeGoal {
-  id             String   @id @default(uuid())
-  title          String
-  description    String?
-  targetAmount   Decimal
-  savedAmount    Decimal  @default(0)
-  targetDate     DateTime
-  status         GoalStatus @default(ACTIVE)
-  userId         String
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountId      String
-  account        Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  targetAmount Decimal
+  savedAmount  Decimal    @default(0)
+  targetDate   DateTime
+  status       GoalStatus @default(ACTIVE)
+  userId       String
+  accountId    String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  account      Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([accountId])
   @@map("life_goals")
 }
 
-
-
 model Budget {
-  id          String       @id @default(uuid())
-  amount      Decimal
-  lastAlertSent DateTime?  // Track when the last alert was sent
-  userId      String       @unique
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id                      String    @id @default(uuid())
+  amount                  Decimal
+  lastAlertSent           DateTime?
+  userId                  String    @unique
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  month                   String?
+  spent                   Decimal?  @default(0) @db.Decimal
+  lastPercentageAlertSent Float?    @default(0)
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, month], map: "budgets_userid_month_unique")
   @@index([userId])
   @@map("budgets")
+}
+
+model Notification {
+  id        String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean?  @default(false)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId, createdAt(sort: Desc)], map: "idx_notifications_user_created")
+  @@map("notifications")
+}
+
+model NewsletterSubscriber {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique
+  subscribedat DateTime? @default(now()) @db.Timestamptz(6)
+  active       Boolean   @default(true)
+
+  @@map("newsletter_subscribers")
+}
+
+model EmiLoan {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  loanAmount   Decimal    @map("loanamount") @db.Decimal
+  interestRate Decimal    @map("interestrate") @db.Decimal
+  emiAmount    Decimal    @map("emiamount") @db.Decimal
+  tenureMonths Int        @map("tenuremonths")
+  paidMonths   Int?       @default(0) @map("paidmonths")
+  startDate    DateTime   @map("startdate") @db.Timestamp(6)
+  status       LoanStatus @default(ACTIVE)
+  userId       String     @map("userid")
+  createdAt    DateTime?  @default(now()) @map("createdat") @db.Timestamp(6)
+  updatedAt    DateTime?  @default(now()) @map("updatedat") @db.Timestamp(6)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+  @@map("emi_loans")
 }
 
 enum TransactionType {
@@ -127,4 +172,10 @@ enum RecurringInterval {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum LoanStatus {
+  ACTIVE
+  CLOSED
+  DEFAULTED
 }

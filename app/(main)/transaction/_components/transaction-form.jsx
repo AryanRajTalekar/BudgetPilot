@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { createTransaction, updateTransaction } from "@/actions/transaction";
 import { transactionSchema } from "@/app/lib/schema";
 import { ReceiptScanner } from "./recipt-scanner";
+import { useState } from "react";
 
 export function AddTransactionForm({
   accounts,
@@ -40,6 +41,10 @@ export function AddTransactionForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [fileType, setFileType] = useState(null);
+
 
   const {
     register,
@@ -94,19 +99,20 @@ export function AddTransactionForm({
     }
   };
 
-  const handleScanComplete = (scannedData) => {
-    if (scannedData) {
-      setValue("amount", scannedData.amount.toString());
-      setValue("date", new Date(scannedData.date));
-      if (scannedData.description) {
-        setValue("description", scannedData.description);
-      }
-      if (scannedData.category) {
-        setValue("category", scannedData.category);
-      }
-      toast.success("Receipt scanned successfully");
-    }
-  };
+const handleScanComplete = (data) => {
+  if (data?.file) {
+    const url = URL.createObjectURL(data.file);
+    setPreviewUrl(url);
+    setFileType(data.file.type);
+  }
+
+  if (data?.amount) {
+    setValue("amount", data.amount.toString());
+    setValue("date", new Date(data.date));
+    if (data.description) setValue("description", data.description);
+    if (data.category) setValue("category", data.category);
+  }
+};
 
   useEffect(() => {
     if (transactionResult?.success && !transactionLoading) {
@@ -129,12 +135,24 @@ export function AddTransactionForm({
   );
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 sm:space-y-7"
-    >
-      {!editMode && <ReceiptScanner onScanComplete={handleScanComplete} />}
+  <div className="w-full max-w-[1400px] mx-auto px-4">
 
+   
+
+   <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-6">
+
+      {/* 🟦 LEFT BOX (FORM + SCANNER) */}
+      <div className="border rounded-xl p-6 space-y-6">
+
+        {!editMode && (
+          <ReceiptScanner onScanComplete={handleScanComplete} />
+        )}
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+      
       {/* Type */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-black dark:text-white">
@@ -144,7 +162,7 @@ export function AddTransactionForm({
           onValueChange={(value) => setValue("type", value)}
           defaultValue={type}
         >
-          <SelectTrigger className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5 focus:ring-1 focus:ring-purple-500">
+          <SelectTrigger className="bg-white dark:bg-zinc-900/70 border border-black/5 dark:border-white/5">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -152,9 +170,6 @@ export function AddTransactionForm({
             <SelectItem value="INCOME">Income</SelectItem>
           </SelectContent>
         </Select>
-        {errors.type && (
-          <p className="text-sm text-red-500">{errors.type.message}</p>
-        )}
       </div>
 
       {/* Amount & Account */}
@@ -293,22 +308,13 @@ export function AddTransactionForm({
         />
       </div>
 
-      {/* Actions */}
+    {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full border-black/10 dark:border-white/10"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>
 
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 text-white hover:opacity-90 transition-all duration-300"
-          disabled={transactionLoading}
-        >
+        <Button type="submit" disabled={transactionLoading}>
           {transactionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -321,6 +327,34 @@ export function AddTransactionForm({
           )}
         </Button>
       </div>
+
     </form>
-  );
+ </div>
+
+      {/* 🟪 RIGHT BOX (PREVIEW) */}
+      <div className="border rounded-xl p-4 flex items-center justify-center min-h-[500px]">
+
+        {previewUrl ? (
+          fileType?.startsWith("image") ? (
+            <img
+              src={previewUrl}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <iframe
+              src={previewUrl}
+              className="w-full h-full"
+            />
+          )
+        ) : (
+          <p className="text-muted-foreground">
+            Preview will appear here
+          </p>
+        )}
+
+      </div>
+
+    </div>
+  </div>
+);
 }
