@@ -11,17 +11,17 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-screen w-full bg-white dark:bg-black overflow-hidden pt-20">
       {/* Decorative Stars */}
-      <span className="absolute top-24 left-10 text-black text-2xl select-none dark:text-white">
+      <span className="hidden sm:block absolute top-24 left-10 text-black text-2xl dark:text-white">
         ✦
       </span>
-      <span className="absolute top-40 right-[42%] text-black text-lg select-none dark:text-white">
+      <span className="hidden sm:block absolute top-40 right-[42%] text-black text-2xl dark:text-white">
         ✦
       </span>
-      <span className="absolute bottom-32 left-16 text-black text-xl select-none dark:text-white">
+      <span className="hidden sm:block absolute bottom-32 left-16 text-black text-2xl dark:text-white">
         ✦
       </span>
 
-      <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between min-h-[calc(100vh-80px)] gap-12">
+     <div className="container mx-auto px-4 sm:px-6 md:px-12 flex flex-col md:flex-row items-center justify-between min-h-[calc(100vh-80px)] gap-10 md:gap-12">
         {/* Left Side */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
@@ -29,33 +29,33 @@ const HeroSection = () => {
           transition={{ duration: 0.8 }}
           className="flex-1 max-w-xl z-10"
         >
-          <h1 className="text-5xl md:text-6xl lg:text-[64px] font-extrabold text-black dark:text-white leading-[1.1] tracking-tight mb-5">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-[64px] font-extrabold text-black dark:text-white leading-[1.1] tracking-tight mb-5 text-center md:text-left">
             Make The Best
             <br />
             Financial Decisions
           </h1>
-          <p className="text-gray-500 text-base md:text-lg dark:text-gray-300 leading-relaxed mb-8 max-w-sm">
+          <p className="text-gray-500 text-sm sm:text-base md:text-lg dark:text-gray-300 leading-relaxed mb-8 max-w-md text-center md:text-left mx-auto md:mx-0">
             Track your spending, understand your habits, and take control of
             your money with smart insights and automation.
           </p>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <SignedOut>
               <SignInButton forceRedirectUrl="/dashboard">
-                <Button className="bg-[#E63946] hover:bg-[#c7303c] text-white rounded-full px-7 py-3 text-sm font-semibold shadow-md">
+               <Button className="w-full sm:w-auto bg-[#E63946] hover:bg-[#c7303c] text-white rounded-full px-6 sm:px-7 py-3 text-sm font-semibold shadow-md">
                   Get Started
                 </Button>
               </SignInButton>
             </SignedOut>
             <SignedIn>
               <Link href="/dashboard">
-                <Button className="bg-[#E63946] hover:bg-[#c7303c] text-white rounded-full px-7 py-3 text-sm font-semibold shadow-md">
+                <Button className="w-full sm:w-auto bg-[#E63946] hover:bg-[#c7303c] text-white rounded-full px-6 sm:px-7 py-3 text-sm font-semibold shadow-md">
                   Get Started
                 </Button>
               </Link>
             </SignedIn>
 
-            <button className="flex items-center gap-2 text-black dark:text-white dark:border-white font-semibold text-sm hover:opacity-70 transition">
+            <button className="flex items-center justify-center sm:justify-start gap-2 text-black dark:text-white font-semibold text-sm hover:opacity-70 transition w-full sm:w-auto">
               <span className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-black dark:border-white">
                 <Play size={14} fill="black" />
               </span>
@@ -93,7 +93,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex-1 relative flex justify-center items-center min-h-[520px]"
+          className="flex-1 relative flex justify-center items-center min-h-[400px] sm:min-h-[520px] mt-10 md:mt-0"
         >
           {/* Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full bg-[#E63946]/60 blur-[80px] z-0" />
@@ -108,9 +108,9 @@ const HeroSection = () => {
               ease: "easeInOut",
               delay: 0.3,
             }}
-            className="absolute top-8 left-8 md:left-4 rotate-[-14deg] z-10"
+             className="hidden sm:block absolute top-6 left-2 sm:left-6 md:left-4 rotate-[-14deg] z-10"
           >
-            <div className="w-[160px] md:w-[185px] h-[330px] md:h-[380px] bg-white  rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="w-[100px] sm:w-[140px] md:w-[185px] h-[220px] sm:h-[300px] md:h-[380px] bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden">
               <PhoneMockup1 />
             </div>
           </motion.div>
@@ -124,9 +124,9 @@ const HeroSection = () => {
               ease: "easeInOut",
               delay: 0.15,
             }}
-            className="absolute top-0 right-10 md:right-4 rotate-[12deg] z-20"
+            className="hidden sm:block absolute top-0 right-2 sm:right-6 md:right-4 rotate-[12deg] z-20"
           >
-            <div className="w-[160px] md:w-[185px] h-[330px] md:h-[380px] bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="w-[100px] sm:w-[140px] md:w-[185px] h-[220px] sm:h-[300px] md:h-[380px] bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden">
               <PhoneMockup2 />
             </div>
           </motion.div>
@@ -137,7 +137,7 @@ const HeroSection = () => {
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
             className="relative z-30"
           >
-            <div className="w-[180px] md:w-[210px] h-[360px] md:h-[420px] bg-white rounded-[36px] shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="w-[120px] sm:w-[160px] md:w-[210px] h-[260px] sm:h-[340px] md:h-[420px] bg-white rounded-[36px] shadow-2xl border border-gray-100 overflow-hidden">
               <PhoneMockup3 />
             </div>
           </motion.div>

@@ -135,10 +135,11 @@ export function AddTransactionForm({
   );
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-6">
+    <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-4 sm:gap-6">
+
         {/* 🟦 LEFT BOX (FORM + SCANNER) */}
-        <div className="border rounded-xl p-6 space-y-6">
+        <div className="border rounded-xl p-4 sm:p-6 space-y-5 sm:space-y-6">
           {!editMode && (
             <ReceiptScanner
               onScanComplete={handleScanComplete}
@@ -148,7 +149,7 @@ export function AddTransactionForm({
             />
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
             {/* Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-black dark:text-white">
@@ -312,16 +313,17 @@ export function AddTransactionForm({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
               <Button
                 type="button"
                 variant="outline"
+                className="w-full sm:w-auto"
                 onClick={() => router.back()}
               >
                 Cancel
               </Button>
 
-              <Button type="submit" disabled={transactionLoading}>
+              <Button type="submit" disabled={transactionLoading} className="w-full sm:w-auto sm:flex-1">
                 {transactionLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -338,8 +340,7 @@ export function AddTransactionForm({
         </div>
 
         {/* 🟪 RIGHT BOX (PREVIEW) */}
-        {/* 🟪 RIGHT BOX (PREVIEW) */}
-        <div className="border rounded-xl p-4 w-full h-[500px] overflow-hidden flex items-center justify-center bg-muted/20">
+        <div className="border rounded-xl p-4 w-full h-[300px] sm:h-[420px] lg:h-[500px] overflow-hidden flex items-center justify-center bg-muted/20">
           {previewUrl ? (
             fileType?.startsWith("image") ? (
               <div className="relative w-full h-full">
@@ -350,11 +351,11 @@ export function AddTransactionForm({
                   className="object-contain"
                 />
               </div>
-            ) : (   
+            ) : (
               <iframe src={previewUrl} className="w-full h-full" />
             )
           ) : (
-            <p className="text-muted-foreground">Preview will appear here</p>
+            <p className="text-muted-foreground text-sm">Preview will appear here</p>
           )}
         </div>
       </div>

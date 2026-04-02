@@ -3,10 +3,10 @@
 import { useState, useTransition } from "react";
 import {
   createEmiLoan,
-  getUserEmiLoans,
-  getLoanDetails,
+  // getUserEmiLoans,
+  // getLoanDetails,
   simulateEarlyPayoff,
-  markEmiPaid,
+  // markEmiPaid,
   calculateLoanEMI,
 } from "@/actions/emiTracker";
 

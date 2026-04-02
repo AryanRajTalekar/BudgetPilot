@@ -30,12 +30,10 @@ export function CreateGoalDrawer() {
     accountId: "",
   });
 
-  // Load accounts when drawer opens
   useEffect(() => {
     if (open) {
       getUserAccounts().then((data) => {
         setAccounts(data || []);
-        // Pre-select default account if available
         const def = data?.find((a) => a.isDefault);
         if (def) setForm((f) => ({ ...f, accountId: def.id }));
       });
@@ -53,7 +51,6 @@ export function CreateGoalDrawer() {
     if (!form.targetDate) return toast.error("Select a target date");
     if (!form.accountId) return toast.error("Select an account to link");
 
-    // Target date must be in the future
     if (new Date(form.targetDate) <= new Date())
       return toast.error("Target date must be in the future");
 
@@ -82,7 +79,6 @@ export function CreateGoalDrawer() {
     });
   };
 
-  // Min date = tomorrow
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const minDateStr = minDate.toISOString().split("T")[0];
@@ -96,12 +92,12 @@ export function CreateGoalDrawer() {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent>
+      <DrawerContent className="pb-safe">
         <DrawerHeader>
           <DrawerTitle>Create a new financial goal</DrawerTitle>
         </DrawerHeader>
 
-        <div className="px-4 pb-6 space-y-4 max-w-md mx-auto w-full">
+        <div className="px-4 pb-6 space-y-4 w-full max-w-md mx-auto">
 
           {/* Title */}
           <div className="space-y-1.5">
@@ -192,7 +188,7 @@ export function CreateGoalDrawer() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               className="flex-1"
               onClick={handleSubmit}
@@ -201,7 +197,7 @@ export function CreateGoalDrawer() {
               {pending ? "Creating…" : "Create goal"}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline" disabled={pending}>
+              <Button variant="outline" className="flex-1" disabled={pending}>
                 Cancel
               </Button>
             </DrawerClose>

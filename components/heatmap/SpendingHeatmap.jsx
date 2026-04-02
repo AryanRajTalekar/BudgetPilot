@@ -3,40 +3,17 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getSpendingHeatmap } from "@/actions/spendingHeatmap";
 
-// ─────────────────────────────────────────────────────────────────
-// HOW FLUID WIDTH WORKS:
-//
-// The grid has a fixed number of columns (totalCols = ~53 weeks).
-// Previously CELL_PX was hardcoded to 14, so 53 × 14 = 742px —
-// leaving the right half of a 1500px card empty.
-//
-// Now: a ResizeObserver watches the grid wrapper div. When its
-// width is known (after paint), we compute:
-//
-//   cellSize = floor((containerWidth - DAY_LABEL_WIDTH) / totalCols) - GAP
-//
-// so cells + gaps fill exactly containerWidth. On window resize the
-// observer fires again and cells re-scale — works on any screen.
-//
-// Month labels still use absolute positioning at colIndex * CELL_PX,
-// where CELL_PX = cellSize + GAP — so they stay perfectly aligned
-// regardless of cell size.
-//
-// All three previous bugs (timezone, loop boundary, label drift)
-// are preserved from the last fix.
-// ─────────────────────────────────────────────────────────────────
-
-const GAP            = 4;   // px gap between cells (fixed)
-const DAY_LABEL_W    = 32;  // px width of the "Mon/Wed/Fri" column
-const MIN_CELL       = 10;  // never shrink below 10px
-const MAX_CELL       = 22;  // never grow above 18px (looks too big)
+const GAP            = 4;
+const DAY_LABEL_W    = 32;
+const MIN_CELL       = 10;
+const MAX_CELL       = 22;
 
 const LEVEL_COLORS = [
-  "bg-gray-800/50",    // 0 — no spend
-  "bg-emerald-900",    // 1 — low
-  "bg-emerald-700",    // 2 — moderate
-  "bg-emerald-500",    // 3 — high
-  "bg-emerald-300",    // 4 — very high
+  "bg-gray-800/50",
+  "bg-emerald-900",
+  "bg-emerald-700",
+  "bg-emerald-500",
+  "bg-emerald-300",
 ];
 
 const MONTH_NAMES = [
@@ -46,7 +23,6 @@ const MONTH_NAMES = [
 
 const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-// ─── Date helpers — LOCAL time only, no toISOString() ────────────
 function parseLocalDate(str) {
   const [y, m, d] = str.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -59,7 +35,6 @@ function toLocalStr(date) {
   return `${y}-${m}-${d}`;
 }
 
-// ─── Week grid builder ────────────────────────────────────────────
 function buildWeekGrid(heatmapData) {
   if (!heatmapData?.length) return [];
 
@@ -70,10 +45,10 @@ function buildWeekGrid(heatmapData) {
   const last  = parseLocalDate(heatmapData[heatmapData.length - 1].date);
 
   const gridStart = new Date(first);
-  gridStart.setDate(gridStart.getDate() - gridStart.getDay()); // rewind to Sunday
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
   const gridEnd = new Date(last);
-  gridEnd.setDate(gridEnd.getDate() + ((6 - gridEnd.getDay() + 7) % 7)); // advance to Saturday
+  gridEnd.setDate(gridEnd.getDate() + ((6 - gridEnd.getDay() + 7) % 7));
 
   const weeks  = [];
   const cursor = new Date(gridStart);
@@ -95,7 +70,6 @@ function buildWeekGrid(heatmapData) {
   return weeks;
 }
 
-// ─── Month labels — absolute positions at colIndex * cellPx ──────
 function buildMonthLabels(weeks) {
   const labels  = [];
   let lastMonth = -1;
@@ -111,23 +85,19 @@ function buildMonthLabels(weeks) {
   return labels;
 }
 
-// ─── Hook: measure container, return optimal cell size ───────────
 function useCellSize(containerRef, totalCols) {
-  const [cellSize, setCellSize] = useState(14); // initial guess
+  const [cellSize, setCellSize] = useState(14);
 
   const compute = useCallback(() => {
     if (!containerRef.current || totalCols === 0) return;
     const available = containerRef.current.getBoundingClientRect().width - DAY_LABEL_W;
-    // Each column occupies cellSize + GAP px. Solve for cellSize:
-    //   totalCols * (cellSize + GAP) = available
-    //   cellSize = available / totalCols - GAP
     const raw = available / totalCols - GAP;
     setCellSize(Math.max(MIN_CELL, Math.min(MAX_CELL, Math.floor(raw))));
   }, [containerRef, totalCols]);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    compute(); // run once on mount
+    compute();
 
     const ro = new ResizeObserver(compute);
     ro.observe(containerRef.current);
@@ -137,9 +107,6 @@ function useCellSize(containerRef, totalCols) {
   return cellSize;
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Main component
-// ─────────────────────────────────────────────────────────────────
 export default function SpendingHeatmap({ months = 12 }) {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
@@ -157,9 +124,8 @@ export default function SpendingHeatmap({ months = 12 }) {
   const monthLabels = buildMonthLabels(weeks);
   const totalCols   = weeks.length;
 
-  // cellSize updates whenever the container resizes
   const cellSize = useCellSize(containerRef, totalCols);
-  const cellPx   = cellSize + GAP; // total width of one column slot
+  const cellPx   = cellSize + GAP;
 
   const fmt = (n) =>
     `₹${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -170,27 +136,20 @@ export default function SpendingHeatmap({ months = 12 }) {
   const { thresholds, categoryTotals, totalSpend, activeDays } = data;
 
   return (
-    <div className="bg-card border rounded-xl p-5 space-y-5 shadow-sm">
+    <div className="bg-card border rounded-xl p-3 sm:p-5 space-y-5 shadow-sm">
       <h2 className="text-base font-semibold">Spending Activity</h2>
 
-      {/* ── Stats ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <StatCard label="Total Spend"  value={fmt(totalSpend)} />
         <StatCard label="Active Days"  value={`${activeDays} days`} />
         <StatCard label="Top Category" value={Object.keys(categoryTotals)[0] ?? "—"} capitalize />
       </div>
 
-      {/* ── Grid ──────────────────────────────────────────────── */}
-      {/*
-        ref={containerRef} — ResizeObserver watches this element.
-        w-full ensures it takes the card's full inner width.
-        No overflow-x-auto here because cells are sized to fit exactly.
-      */}
-      <div ref={containerRef} className="w-full">
+      {/* Grid */}
+      <div ref={containerRef} className="w-full overflow-x-auto">
 
-        {/* Month label row
-            position:relative div offset by DAY_LABEL_W.
-            Each label is position:absolute at colIndex * cellPx — exact column alignment. */}
+        {/* Month labels */}
         <div
           className="relative h-[18px] mb-[6px]"
           style={{ marginLeft: DAY_LABEL_W }}
@@ -206,10 +165,9 @@ export default function SpendingHeatmap({ months = 12 }) {
           ))}
         </div>
 
-        {/* Day labels + week columns */}
         <div className="flex">
 
-          {/* Day-of-week labels */}
+          {/* Day labels */}
           <div
             className="flex flex-col shrink-0"
             style={{ width: DAY_LABEL_W, gap: GAP }}
@@ -229,12 +187,11 @@ export default function SpendingHeatmap({ months = 12 }) {
             ))}
           </div>
 
-          {/* Week columns — fluid, fills remaining width */}
-          <div className="flex" style={{ gap: GAP }}>
+          {/* Weeks */}
+          <div className="flex min-w-max" style={{ gap: GAP }}>
             {weeks.map((week, wi) => (
               <div key={wi} className="flex flex-col" style={{ gap: GAP }}>
                 {week.map((day, di) => {
-                  // null = padding cell (transparent, same size)
                   if (!day) {
                     return (
                       <div
@@ -280,7 +237,7 @@ export default function SpendingHeatmap({ months = 12 }) {
         </div>
       </div>
 
-      {/* ── Tooltip ───────────────────────────────────────────── */}
+      {/* Tooltip */}
       {tooltip && (
         <div
           className="fixed z-50 pointer-events-none bg-popover border border-border rounded-lg px-3 py-2 shadow-xl"
@@ -309,7 +266,6 @@ export default function SpendingHeatmap({ months = 12 }) {
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────
 function StatCard({ label, value, capitalize }) {
   return (
     <div className="bg-muted/40 rounded-lg p-3 border">

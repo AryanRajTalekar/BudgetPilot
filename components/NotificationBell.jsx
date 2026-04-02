@@ -18,22 +18,20 @@ export default function NotificationBell() {
       if (!isActive) return;
 
       const res = await fetch(`/api/notifications?since=${lastFetchedAt}`);
-
       const data = await res.json();
       const newNotifications = data.notifications || [];
 
       if (newNotifications.length > 0) {
         setNotifications((prev) => {
           const existingIds = new Set(prev.map((n) => n.id));
-
           const filtered = newNotifications.filter(
             (n) => !existingIds.has(n.id),
           );
-
           return [...filtered, ...prev].slice(0, 50);
         });
 
-        lastFetchedAt = newNotifications[newNotifications.length - 1].createdAt;
+        lastFetchedAt =
+          newNotifications[newNotifications.length - 1].createdAt;
 
         interval = 15000;
       } else {
@@ -43,7 +41,6 @@ export default function NotificationBell() {
       setTimeout(fetchNotifications, interval);
     };
 
-    // initial load
     fetch("/api/notifications")
       .then((res) => res.json())
       .then((data) => {
@@ -70,24 +67,22 @@ export default function NotificationBell() {
     };
   }, []);
 
- useEffect(() => {
-  if (open) {
-    const unread = notifications.filter((n) => !n.read);
+  useEffect(() => {
+    if (open) {
+      const unread = notifications.filter((n) => !n.read);
 
-    if (unread.length === 0) return;
+      if (unread.length === 0) return;
 
-    fetch("/api/notifications/read", {
-      method: "POST",
-      body: JSON.stringify({ all: true }),
-    });
+      fetch("/api/notifications/read", {
+        method: "POST",
+        body: JSON.stringify({ all: true }),
+      });
 
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, read: true }))
-    );
-  }
-
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [open]);
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      );
+    }
+  }, [open]);
 
   function timeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -102,7 +97,7 @@ export default function NotificationBell() {
 
   return (
     <div className="relative">
-      {/* 🔔 Bell Button (shadcn style) */}
+      {/* 🔔 Bell */}
       <Button
         variant="outline"
         size="icon"
@@ -120,7 +115,16 @@ export default function NotificationBell() {
 
       {/* 📥 Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-black border rounded-xl shadow-xl p-3 z-50">
+        <div
+          className="
+          absolute right-0 mt-2 
+          w-[90vw] sm:w-80 
+          max-w-[320px]
+          bg-white dark:bg-black 
+          border rounded-xl shadow-xl 
+          p-3 z-50
+        "
+        >
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-semibold">Notifications</h3>
 
@@ -132,10 +136,6 @@ export default function NotificationBell() {
                     method: "POST",
                     body: JSON.stringify({ all: true }),
                   });
-
-                  setNotifications((prev) =>
-                    prev.map((n) => ({ ...n, read: true })),
-                  );
 
                   setNotifications((prev) =>
                     prev.map((n) => ({ ...n, read: true })),
@@ -153,7 +153,7 @@ export default function NotificationBell() {
             </p>
           )}
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-72 sm:max-h-80 overflow-y-auto pr-1">
             {notifications.map((n) => (
               <div
                 key={n.id}
@@ -169,19 +169,21 @@ export default function NotificationBell() {
                     ),
                   );
                 }}
-                className={`p-3 rounded-lg mb-2 cursor-pointer transition border ${
+                className={`p-3 rounded-lg mb-2 cursor-pointer transition border text-sm ${
                   n.read
                     ? "bg-gray-50 dark:bg-neutral-900 border-transparent"
                     : "bg-blue-50 dark:bg-neutral-800 border-blue-200"
                 }`}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium">{n.title}</p>
-                    <p className="text-xs text-gray-500">{n.message}</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1">
+                    <p className="font-medium">{n.title}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2">
+                      {n.message}
+                    </p>
                   </div>
 
-                  <span className="text-[10px] text-gray-400">
+                  <span className="text-[10px] text-gray-400 whitespace-nowrap">
                     {timeAgo(n.createdAt)}
                   </span>
                 </div>
