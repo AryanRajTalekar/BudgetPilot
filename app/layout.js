@@ -12,6 +12,8 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "BudgetPilot",
   description: "One stop Finance Platform",
+  manifest: "/manifest.json",
+  themeColor: "#0f172a",
   icons: {
     icon: "/logo.svg",
   },
