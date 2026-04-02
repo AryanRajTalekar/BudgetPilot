@@ -7,6 +7,7 @@ import {
   processRecurringTransaction,
   triggerRecurringTransactions,
   processBankStatement,
+  processReceiptScan,
 } from "@/lib/inngest/function";
 
 // NEW
@@ -28,5 +29,6 @@ export const { GET, POST, PUT } = serve({
     weeklyFinanceDigest,
     enhancedBudgetAlerts,
     sendWeeklyNewsletter,
+    processReceiptScan
   ],
 });

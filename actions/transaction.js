@@ -3,12 +3,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// import { GoogleGenerativeAI } from "@google/generative-ai";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import { createNotification } from "@/lib/notifications";
+import { inngest } from "@/lib/inngest/client";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const serializeAmount = (obj) => ({
   ...obj,
@@ -348,75 +350,33 @@ export async function getUserTransactions(query = {}) {
   }
 }
 
+
 // Scan Receipt (STABLE & WORKING)
-export async function scanReceipt(file) {
+export async function scanReceipt(file,accountId) {
   try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+    if (!user) throw new Error("User not found");
 
     const arrayBuffer = await file.arrayBuffer();
-    const base64String = Buffer.from(arrayBuffer).toString("base64");
+    const base64Image = Buffer.from(arrayBuffer).toString("base64");
 
-    const prompt = `
-Analyze this receipt image and extract the following information in JSON format.
-
-Return ONLY valid JSON in this exact format:
-{
-  "amount": number,
-  "date": "ISO date string",
-  "description": "string",
-  "merchantName": "string",
-  "category": "string"
-}
-
-Categories:
-housing, transportation, groceries, utilities, entertainment,
-food, shopping, healthcare, education, personal, travel,
-insurance, gifts, bills, other-expense
-
-Rules:
-- amount must be the final total
-- date must be ISO format
-- description must be short
-- if not a receipt, return {}
-`;
-
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64String,
-          mimeType: file.type,
-        },
+    await inngest.send({
+      name: "receipt/scan",
+      data: {
+        base64Image,
+        mimeType: file.type,
+        userId: user.id,
+        accountId, // see note below
       },
-      prompt,
-    ]);
-
-    const response = await result.response;
-    const text = response.text(); // ✅ THIS WORKS
-    const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
-
-    const data = JSON.parse(cleanedText);
-
-    if (!data.amount) return {};
-
-    await createNotification({
-      userId,
-      title: "🧾 Receipt Scanned",
-      message: `₹${data.amount} from ${data.merchantName} detected`,
-      type: "AI",
     });
 
-    return {
-      amount: Number(data.amount),
-      date: new Date(data.date),
-      description: data.description,
-      merchantName: data.merchantName,
-      category: data.category,
-    };
+    return { queued: true };
   } catch (error) {
-    console.error("Error scanning receipt:", error);
-    throw new Error("Failed to scan receipt");
+    console.error("Error queuing receipt scan:", error);
+    throw new Error("Failed to queue receipt scan");
   }
 }
 

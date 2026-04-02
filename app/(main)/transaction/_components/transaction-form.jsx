@@ -31,6 +31,7 @@ import { createTransaction, updateTransaction } from "@/actions/transaction";
 import { transactionSchema } from "@/app/lib/schema";
 import { ReceiptScanner } from "./recipt-scanner";
 import { useState } from "react";
+import Image from "next/image";
 
 export function AddTransactionForm({
   accounts,
@@ -145,7 +146,8 @@ const handleScanComplete = (data) => {
       <div className="border rounded-xl p-6 space-y-6">
 
         {!editMode && (
-          <ReceiptScanner onScanComplete={handleScanComplete} />
+          <ReceiptScanner onScanComplete={handleScanComplete} setPreviewUrl={setPreviewUrl}
+    setFileType={setFileType} accountId={getValues("accountId")}/>
         )}
 
         <form
@@ -204,7 +206,7 @@ const handleScanComplete = (data) => {
             <SelectContent>
               {accounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
-                  {account.name} (${parseFloat(account.balance).toFixed(2)})
+                  {account.name} (₹{parseFloat(account.balance).toFixed(2)})
                 </SelectItem>
               ))}
               <CreateAccountDrawer>
@@ -332,13 +334,15 @@ const handleScanComplete = (data) => {
  </div>
 
       {/* 🟪 RIGHT BOX (PREVIEW) */}
-      <div className="border rounded-xl p-4 flex items-center justify-center min-h-[500px]">
+      <div className="border rounded-xl p-4 flex items-center justify-center min-h-[500px] overflow-hidden">
 
         {previewUrl ? (
           fileType?.startsWith("image") ? (
-            <img
+            <Image
               src={previewUrl}
+              alt="receipt-image  "
               className="w-full h-full object-contain"
+              fill
             />
           ) : (
             <iframe
