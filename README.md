@@ -160,5 +160,6 @@ Built by Aryan Talekar
 ---
 
 **Project Description**:
-```
 AI-powered personal finance app for Indian users. Track expenses, manage EMI loans, set savings goals with velocity tracking, get weekly AI investment advice, and receive automated budget alerts. Built with Next.js 15, Prisma, Gemini AI, Inngest, and Resend.
+```
+
